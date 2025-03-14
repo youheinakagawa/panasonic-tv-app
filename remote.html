@@ -162,8 +162,24 @@
     const urlParams = new URLSearchParams(window.location.search);
     const tvIp = urlParams.get('ip');
     const tvPort = urlParams.get('port');
+    const tvName = urlParams.get('name') || 'Panasonic TV';
+    const tvModel = urlParams.get('model') || '';
     
-    document.getElementById('tv-ip').textContent = `TV: ${tvIp}:${tvPort}`;
+    document.getElementById('tv-ip').textContent = tvName;
+    
+    // Add model information if available
+    if (tvModel.trim()) {
+      const modelElem = document.createElement('div');
+      modelElem.textContent = tvModel;
+      modelElem.style.fontSize = '12px';
+      document.querySelector('.tv-info').appendChild(modelElem);
+    }
+    
+    // Add IP information
+    const ipElem = document.createElement('div');
+    ipElem.textContent = `${tvIp}:${tvPort}`;
+    ipElem.style.fontSize = '12px';
+    document.querySelector('.tv-info').appendChild(ipElem);
     
     // Add event listeners for remote buttons
     document.querySelectorAll('.remote-button, .power-button').forEach(button => {

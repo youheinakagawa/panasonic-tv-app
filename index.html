@@ -36,13 +36,39 @@
       
       devices.forEach(device => {
         const li = document.createElement('li');
-        li.textContent = `Panasonic TV found at ${device.ip}:${device.port}`;
+        
+        // Create a div for TV details
+        const detailsDiv = document.createElement('div');
+        
+        // Add TV name and model if available
+        if (device.friendlyName) {
+          const nameElem = document.createElement('strong');
+          nameElem.textContent = device.friendlyName;
+          detailsDiv.appendChild(nameElem);
+          detailsDiv.appendChild(document.createElement('br'));
+        }
+        
+        // Add model information if available
+        if (device.modelName || device.modelNumber) {
+          const modelElem = document.createElement('span');
+          modelElem.textContent = `${device.modelName || ''} ${device.modelNumber || ''}`.trim();
+          detailsDiv.appendChild(modelElem);
+          detailsDiv.appendChild(document.createElement('br'));
+        }
+        
+        // Add IP address
+        const ipElem = document.createElement('span');
+        ipElem.textContent = `IP: ${device.ip}:${device.port}`;
+        detailsDiv.appendChild(ipElem);
+        
+        li.appendChild(detailsDiv);
         
         // Add a button to control the TV
         const button = document.createElement('button');
         button.textContent = 'Control';
+        button.style.marginLeft = '10px';
         button.onclick = () => {
-          window.location.href = `remote.html?ip=${device.ip}&port=${device.port}`;
+          window.location.href = `remote.html?ip=${device.ip}&port=${device.port}&name=${encodeURIComponent(device.friendlyName || 'Panasonic TV')}&model=${encodeURIComponent((device.modelName || '') + ' ' + (device.modelNumber || ''))}`;
         };
         
         li.appendChild(document.createTextNode(' '));
