@@ -11,6 +11,9 @@
 - [x] Use UPnP/DLNA for TV discovery and control.
 - [x] Use IPC (Inter-Process Communication) for communication between the main process and renderer process.
 - [x] Use HTML, CSS, and JavaScript for the user interface.
+- [x] Use electron-builder for packaging the application as a standalone executable.
+- [x] Use PowerShell scripts for creating distribution packages.
+- [x] Use batch files for running the application with proper dependency management.
 
 ## Design Patterns
 - [x] Event-driven architecture: The application uses events to communicate between processes.
@@ -24,3 +27,7 @@
 - [x] Renderer Process: Handles the user interface.
   - [x] TV List: Displays a list of discovered TVs.
   - [x] Remote Control: Provides a user interface for controlling TVs.
+- [x] Build System: Handles packaging and distribution of the application.
+  - [x] electron-builder: Packages the application as a standalone executable.
+  - [x] PowerShell Scripts: Creates distribution packages.
+  - [x] Batch Files: Runs the application with proper dependency management.

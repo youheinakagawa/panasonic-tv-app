@@ -19,6 +19,11 @@
 - [x] Additional app buttons: Added buttons for ブラウザ, メディアプレーヤー, テレビメニュー, お気に入り.
 - [x] Function key shortcuts: Added F1-F5 shortcuts for quick access to apps and features.
 - [x] BackSpaceキー support: Added BackSpaceキー as an alternative to ESCキー for Back button functionality.
+- [x] Standalone application: The application can be built as a standalone executable with an installer.
+- [x] Documentation: Added a README.md file with installation and usage instructions.
+- [x] Dependency management: Created batch files to help run the application with the correct dependencies.
+- [x] Distribution: Created PowerShell script to package the application as a ZIP file for easy distribution.
+- [x] Error handling: Added error handling to batch files for better user experience.
 
 ## What's Left to Build
 - [ ] Smart TV features: The application needs to support more smart TV features.
@@ -43,6 +48,11 @@
 - [x] Function key shortcuts have been added for quick access to apps and features.
 - [x] HDMI input switching has been improved with direct commands and additional HDMI3/HDMI4 support.
 - [x] メディアプレーヤー has been confirmed to use the Dボタン (NRC_DATA-ONOFF) command.
+- [x] The application can be built as a standalone executable with an installer for easy distribution.
+- [x] Documentation has been added with installation and usage instructions.
+- [x] Batch files have been created to help run the application with the correct dependencies.
+- [x] A PowerShell script has been created to package the application as a ZIP file for easy distribution.
+- [x] Error handling has been added to batch files for better user experience.
 - [ ] The application needs to implement more smart TV features and settings.
 
 ## Known Issues
@@ -51,3 +61,4 @@
 - [x] Some TV models may not support all the implemented DLNA/UPnP commands.
 - [x] Network errors may cause the application to fail without proper recovery.
 - [x] Some app buttons may not work on all TV models due to differences in supported commands.
+- [x] The unpacked application may have dependency issues when run directly; use the provided batch files or installer.

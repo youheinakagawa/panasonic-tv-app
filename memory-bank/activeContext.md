@@ -27,6 +27,14 @@
 - [x] Added BackSpaceキー support for Back button functionality.
 - [x] Added HDMI3 and HDMI4 input buttons with corresponding keyboard shortcuts.
 - [x] Updated HDMI input commands to use direct commands (NRC_HDMI1-ONOFF, etc.) instead of generic input switching.
+- [x] Added electron-builder for packaging the application as a standalone executable.
+- [x] Created a Windows installer for easy distribution and installation.
+- [x] Added a README.md file with installation and usage instructions.
+- [x] Created batch files to help run the application with the correct dependencies.
+- [x] Fixed dependency issues with the standalone application.
+- [x] Created PowerShell script to package the application as a ZIP file.
+- [x] Added error handling to batch files for better user experience.
+- [x] Updated README.md with instructions for using the ZIP file.
 
 ## Next Steps
 - [x] Implement more TV control functions (e.g., channel change, input selection).
@@ -37,7 +45,8 @@
 - [ ] Add settings for customizing the application.
 - [ ] Implement error handling and recovery for network issues.
 - [ ] Analyze XML logs to discover more TV capabilities and app information.
-- [ ] Add git exclusion for logs directory to avoid committing large XML files.
+- [x] Add git exclusion for logs directory to avoid committing large XML files.
+- [ ] Create builds for other platforms (macOS, Linux).
 
 ## Active Decisions and Considerations
 - [x] Using node-ssdp for UPnP device discovery instead of node-upnp, as node-upnp does not provide device discovery functionality.
@@ -60,3 +69,6 @@
 - [x] Confirmed that メディアプレーヤー uses the Dボタン (NRC_DATA-ONOFF) command.
 - [x] Analyzed XML logs to identify TV capabilities and supported commands.
 - [x] Added logs/ directory to .gitignore to prevent committing large XML files.
+- [x] Using electron-builder for packaging the application as a standalone executable with an installer.
+- [x] Configured the build to exclude logs and memory-bank directories from the packaged application.
+- [x] Created a README.md file with comprehensive installation and usage instructions in Japanese.

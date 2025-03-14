@@ -3,15 +3,42 @@
   "version": "1.0.0",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "dist": "electron-builder --publish never"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["tv", "remote", "panasonic", "dlna", "upnp"],
+  "author": "Panasonic TV App Developer",
   "license": "ISC",
-  "description": "",
+  "description": "Desktop application to control Panasonic TVs over the local network using UPnP/DLNA",
+  "build": {
+    "appId": "com.panasonic.tvapp",
+    "productName": "Panasonic TV Remote",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!logs/**/*",
+      "!memory-bank/**/*",
+      "!dist/**/*"
+    ],
+    "win": {
+      "target": ["nsis"]
+    },
+    "asar": true,
+    "asarUnpack": [
+      "node_modules/node-ssdp/**/*",
+      "node_modules/node-upnp/**/*"
+    ]
+  },
   "dependencies": {
-    "electron": "^35.0.1",
     "node-ssdp": "^4.0.1",
     "node-upnp": "^1.3.0"
+  },
+  "devDependencies": {
+    "electron": "^35.0.1",
+    "electron-builder": "^25.1.8"
   }
 }

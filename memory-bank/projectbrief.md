@@ -9,10 +9,13 @@
 - [x] Discover Panasonic TVs on the local network using UPnP.
 - [x] Display a list of discovered TVs.
 - [x] Provide a remote control interface for controlling TVs.
-- [ ] Implement actual TV control commands using DLNA.
+- [x] Implement TV control commands using DLNA.
+- [x] Package the application for distribution as a standalone executable.
+- [x] Provide documentation for installation and usage.
 
 ## Key Requirements
 - [x] The application must be able to discover Panasonic TVs on the local network.
 - [x] The application must provide a user interface for controlling TVs.
-- [ ] The application must be able to send commands to TVs.
+- [x] The application must be able to send commands to TVs.
 - [ ] The application must be cross-platform (Windows, macOS, Linux).
+- [x] The application must be distributable as a standalone executable.
