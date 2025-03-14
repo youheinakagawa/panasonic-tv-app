@@ -54,6 +54,7 @@ app.whenReady().then(() => {
                 const manufacturerMatch = data.match(/<manufacturer>([^<]+)<\/manufacturer>/);
                 const modelNameMatch = data.match(/<modelName>([^<]+)<\/modelName>/);
                 const modelNumberMatch = data.match(/<modelNumber>([^<]+)<\/modelNumber>/);
+                const deviceTypeMatch = data.match(/<deviceType>([^<]+)<\/deviceType>/);
                 
                 if (friendlyNameMatch) {
                   device.friendlyName = friendlyNameMatch[1];
@@ -66,6 +67,9 @@ app.whenReady().then(() => {
                 }
                 if (modelNumberMatch) {
                   device.modelNumber = modelNumberMatch[1];
+                }
+                if (deviceTypeMatch) {
+                  device.deviceType = deviceTypeMatch[1];
                 }
                 
                 devices.push(device);

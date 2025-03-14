@@ -56,6 +56,16 @@
           detailsDiv.appendChild(document.createElement('br'));
         }
         
+        // Add device type if available
+        if (device.deviceType) {
+          const typeElem = document.createElement('span');
+          typeElem.textContent = `Type: ${device.deviceType}`;
+          typeElem.style.fontSize = '12px';
+          typeElem.style.color = '#666';
+          detailsDiv.appendChild(typeElem);
+          detailsDiv.appendChild(document.createElement('br'));
+        }
+        
         // Add IP address
         const ipElem = document.createElement('span');
         ipElem.textContent = `IP: ${device.ip}:${device.port}`;
