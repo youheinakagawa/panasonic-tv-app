@@ -161,7 +161,7 @@
     // Get TV information from query parameters
     const urlParams = new URLSearchParams(window.location.search);
     const tvIp = urlParams.get('ip');
-    const tvPort = urlParams.get('port');
+    const tvPort = urlParams.get('port') || '55000'; // Default to port 55000 if not specified
     const tvName = urlParams.get('name') || 'Panasonic TV';
     const tvModel = urlParams.get('model') || '';
     

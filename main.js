@@ -39,7 +39,8 @@ app.whenReady().then(() => {
         };
         
         // Check if device is already in the list
-        const exists = devices.some(d => d.usn === device.usn);
+        // Use IP address to check for duplicates, as the same TV might be detected on different ports
+        const exists = devices.some(d => d.ip === device.ip);
         if (!exists) {
           // Get device details
           http.get(headers.LOCATION, (res) => {
