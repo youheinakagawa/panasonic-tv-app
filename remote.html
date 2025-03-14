@@ -141,8 +141,8 @@
       
       <div class="channel">
         <div class="channel-label">Channel</div>
-        <button class="remote-button" id="channel-up">+</button>
-        <button class="remote-button" id="channel-down">-</button>
+        <button class="remote-button" id="channel-up">channel-up</button>
+        <button class="remote-button" id="channel-down">channel-down</button>
       </div>
     </div>
     
@@ -150,6 +150,65 @@
       <button class="remote-button" id="menu">Menu</button>
       <button class="remote-button" id="home">Home</button>
       <button class="remote-button" id="back">Back</button>
+    </div>
+    
+    <!-- 方向キー -->
+    <div style="margin-top: 15px;">
+      <div style="color: white; margin-bottom: 10px;">方向キー</div>
+      <div style="display: flex; flex-direction: column; align-items: center;">
+        <button class="remote-button" id="up">up</button>
+        <div style="display: flex; justify-content: space-between; width: 150px; margin: 5px 0;">
+          <button class="remote-button" id="left">left</button>
+          <button class="remote-button" id="enter">enter</button>
+          <button class="remote-button" id="right">right</button>
+        </div>
+        <button class="remote-button" id="down">down</button>
+      </div>
+    </div>
+    
+    <!-- カラーボタン -->
+    <div style="margin-top: 15px;">
+      <div style="color: white; margin-bottom: 10px;">カラーボタン</div>
+      <div class="button-row">
+        <button class="remote-button" id="red" style="background-color: #e74c3c;">red</button>
+        <button class="remote-button" id="green" style="background-color: #2ecc71;">green</button>
+        <button class="remote-button" id="yellow" style="background-color: #f1c40f;">yellow</button>
+        <button class="remote-button" id="blue" style="background-color: #3498db;">blue</button>
+      </div>
+    </div>
+    
+    <!-- その他のボタン -->
+    <div style="margin-top: 15px;">
+      <div style="color: white; margin-bottom: 10px;">その他</div>
+      <div class="button-row">
+        <button class="remote-button" id="info">info</button>
+        <button class="remote-button" id="guide">guide</button>
+        <button class="remote-button" id="mute">mute</button>
+      </div>
+    </div>
+    
+    <!-- メディア制御 -->
+    <div style="margin-top: 15px;">
+      <div style="color: white; margin-bottom: 10px;">メディア制御</div>
+      <div class="button-row">
+        <button class="remote-button" id="rewind">rewind</button>
+        <button class="remote-button" id="play">play</button>
+        <button class="remote-button" id="forward">forward</button>
+      </div>
+      <div class="button-row" style="margin-top: 5px;">
+        <button class="remote-button" id="prev">prev</button>
+        <button class="remote-button" id="stop">stop</button>
+        <button class="remote-button" id="next">next</button>
+      </div>
+    </div>
+    
+    <div class="input-section" style="margin-top: 15px;">
+      <div class="input-label" style="color: white; margin-bottom: 10px;">入力切替</div>
+      <div class="button-row">
+        <button class="remote-button input-button" id="input-tv">TV</button>
+        <button class="remote-button input-button" id="input-hdmi1">HDMI1</button>
+        <button class="remote-button input-button" id="input-hdmi2">HDMI2</button>
+      </div>
     </div>
     
     <button class="back-button" id="return-to-search">Return to Search</button>
@@ -164,6 +223,11 @@
     const tvPort = urlParams.get('port') || '55000'; // Default to port 55000 if not specified
     const tvName = urlParams.get('name') || 'Panasonic TV';
     const tvModel = urlParams.get('model') || '';
+    const avTransportControlURL = urlParams.get('avTransportControlURL');
+    const renderingControlURL = urlParams.get('renderingControlURL');
+    
+    console.log(`TV Info - IP: ${tvIp}, Port: ${tvPort}, Name: ${tvName}, Model: ${tvModel}`);
+    console.log(`Service URLs - AVTransport: ${avTransportControlURL}, RenderingControl: ${renderingControlURL}`);
     
     document.getElementById('tv-ip').textContent = tvName;
     
@@ -182,7 +246,7 @@
     document.querySelector('.tv-info').appendChild(ipElem);
     
     // Add event listeners for remote buttons
-    document.querySelectorAll('.remote-button, .power-button').forEach(button => {
+    document.querySelectorAll('.remote-button, .power-button, .input-button').forEach(button => {
       button.addEventListener('click', () => {
         const command = button.textContent.trim();
         console.log(`Button pressed: ${command}`);
@@ -191,7 +255,9 @@
         ipcRenderer.send('tv-command', {
           ip: tvIp,
           port: tvPort,
-          command: command
+          command: command,
+          avTransportControlURL: avTransportControlURL,
+          renderingControlURL: renderingControlURL
         });
       });
     });
@@ -223,7 +289,30 @@
           }, 1000);
         }, 2000);
       } else {
-        alert(`Error: ${result.message}`);
+        // Show error notification that stays longer
+        const errorNotification = document.createElement('div');
+        errorNotification.textContent = `Error: ${result.message}`;
+        errorNotification.style.position = 'fixed';
+        errorNotification.style.bottom = '20px';
+        errorNotification.style.left = '50%';
+        errorNotification.style.transform = 'translateX(-50%)';
+        errorNotification.style.backgroundColor = '#e74c3c';
+        errorNotification.style.color = 'white';
+        errorNotification.style.padding = '10px';
+        errorNotification.style.borderRadius = '5px';
+        errorNotification.style.opacity = '1';
+        errorNotification.style.transition = 'opacity 1s';
+        errorNotification.style.maxWidth = '80%';
+        errorNotification.style.textAlign = 'center';
+        
+        document.body.appendChild(errorNotification);
+        
+        setTimeout(() => {
+          errorNotification.style.opacity = '0';
+          setTimeout(() => {
+            document.body.removeChild(errorNotification);
+          }, 1000);
+        }, 5000); // Show error for 5 seconds
       }
     });
     
@@ -231,6 +320,151 @@
     document.getElementById('return-to-search').addEventListener('click', () => {
       window.location.href = 'index.html';
     });
+    
+    // Add keyboard event listener
+    document.addEventListener('keydown', (event) => {
+      console.log(`Key pressed: ${event.key}`);
+      let command = null;
+      
+      // Map keys to commands
+      switch (event.key) {
+        // Numbers
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+          command = event.key;
+          break;
+        
+        // Volume
+        case '+':
+        case '=': // = is on the same key as + on most keyboards
+          command = '+';
+          break;
+        case '-':
+          command = '-';
+          break;
+        
+        // Channel
+        case 'ArrowUp':
+          command = 'channel-up';
+          break;
+        case 'ArrowDown':
+          command = 'channel-down';
+          break;
+        
+        // Navigation
+        case 'Escape':
+          command = 'Back';
+          break;
+        case 'Home':
+          command = 'Home';
+          break;
+        case 'm':
+          command = 'Menu';
+          break;
+        case 'p':
+          command = '⏻'; // Power
+          break;
+        
+        // Input switching
+        case 't':
+          command = 'input-tv';
+          break;
+        case 'h':
+          command = 'input-hdmi1';
+          break;
+        case 'j':
+          command = 'input-hdmi2';
+          break;
+          
+        // Direction
+        case 'ArrowLeft':
+          command = 'left';
+          break;
+        case 'ArrowRight':
+          command = 'right';
+          break;
+        case 'Enter':
+          command = 'enter';
+          break;
+          
+        // Color buttons
+        case 'r':
+          command = 'red';
+          break;
+        case 'g':
+          command = 'green';
+          break;
+        case 'y':
+          command = 'yellow';
+          break;
+        case 'b':
+          command = 'blue';
+          break;
+          
+        // Other
+        case 'i':
+          command = 'info';
+          break;
+        case 'u':
+          command = 'guide'; // EPG
+          break;
+        case 's':
+          command = 'subtitles';
+          break;
+        case 'x':
+          command = 'text'; // Teletext
+          break;
+        case 'q':
+          command = 'mute';
+          break;
+          
+        // Media control
+        case ' ': // Space
+          command = 'play';
+          break;
+        case 'z':
+          command = 'rewind';
+          break;
+        case 'c':
+          command = 'forward';
+          break;
+        case 'a':
+          command = 'prev';
+          break;
+        case 'd':
+          command = 'next';
+          break;
+        case 'v':
+          command = 'stop';
+          break;
+        case 'w':
+          command = 'record';
+          break;
+      }
+      
+      // If a command was mapped, send it
+      if (command) {
+        console.log(`Sending keyboard command: ${command}`);
+        
+        // Send command to main process
+        ipcRenderer.send('tv-command', {
+          ip: tvIp,
+          port: tvPort,
+          command: command,
+          avTransportControlURL: avTransportControlURL,
+          renderingControlURL: renderingControlURL
+        });
+        
+        // Prevent default action (e.g., scrolling with arrow keys)
+        event.preventDefault();
+      }
+    });
   </script>
-</body>
-</html>
