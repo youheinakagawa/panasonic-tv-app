@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Panasonic TV Remote</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f0f0f0;
+    }
+    
+    h1 {
+      color: #333;
+    }
+    
+    .remote {
+      background-color: #333;
+      border-radius: 10px;
+      padding: 20px;
+      width: 300px;
+      margin: 20px auto;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .remote-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    
+    .power-button {
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    
+    .tv-info {
+      color: white;
+      font-size: 14px;
+    }
+    
+    .button-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+    }
+    
+    .remote-button {
+      background-color: #555;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 15px;
+      font-size: 16px;
+      cursor: pointer;
+      min-width: 50px;
+      text-align: center;
+    }
+    
+    .remote-button:hover {
+      background-color: #777;
+    }
+    
+    .volume-channel {
+      display: flex;
+      justify-content: space-between;
+      margin: 20px 0;
+    }
+    
+    .volume, .channel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .volume-label, .channel-label {
+      color: white;
+      margin-bottom: 10px;
+    }
+    
+    .back-button {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 15px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Panasonic TV Remote</h1>
+  
+  <div class="remote">
+    <div class="remote-header">
+      <div class="tv-info">
+        <div id="tv-ip"></div>
+      </div>
+      <button class="power-button" id="power">⏻</button>
+    </div>
+    
+    <div class="button-row">
+      <button class="remote-button">1</button>
+      <button class="remote-button">2</button>
+      <button class="remote-button">3</button>
+    </div>
+    
+    <div class="button-row">
+      <button class="remote-button">4</button>
+      <button class="remote-button">5</button>
+      <button class="remote-button">6</button>
+    </div>
+    
+    <div class="button-row">
+      <button class="remote-button">7</button>
+      <button class="remote-button">8</button>
+      <button class="remote-button">9</button>
+    </div>
+    
+    <div class="button-row">
+      <button class="remote-button">*</button>
+      <button class="remote-button">0</button>
+      <button class="remote-button">#</button>
+    </div>
+    
+    <div class="volume-channel">
+      <div class="volume">
+        <div class="volume-label">Volume</div>
+        <button class="remote-button" id="volume-up">+</button>
+        <button class="remote-button" id="volume-down">-</button>
+      </div>
+      
+      <div class="channel">
+        <div class="channel-label">Channel</div>
+        <button class="remote-button" id="channel-up">+</button>
+        <button class="remote-button" id="channel-down">-</button>
+      </div>
+    </div>
+    
+    <div class="button-row">
+      <button class="remote-button" id="menu">Menu</button>
+      <button class="remote-button" id="home">Home</button>
+      <button class="remote-button" id="back">Back</button>
+    </div>
+    
+    <button class="back-button" id="return-to-search">Return to Search</button>
+  </div>
+  
+  <script>
+    const { ipcRenderer } = require('electron');
+    
+    // Get TV information from query parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const tvIp = urlParams.get('ip');
+    const tvPort = urlParams.get('port');
+    
+    document.getElementById('tv-ip').textContent = `TV: ${tvIp}:${tvPort}`;
+    
+    // Add event listeners for remote buttons
+    document.querySelectorAll('.remote-button, .power-button').forEach(button => {
+      button.addEventListener('click', () => {
+        const command = button.textContent.trim();
+        console.log(`Button pressed: ${command}`);
+        
+        // Send command to main process
+        ipcRenderer.send('tv-command', {
+          ip: tvIp,
+          port: tvPort,
+          command: command
+        });
+      });
+    });
+    
+    // Listen for command result
+    ipcRenderer.on('tv-command-result', (event, result) => {
+      console.log(result);
+      if (result.success) {
+        // Show a small notification that fades out
+        const notification = document.createElement('div');
+        notification.textContent = `Command ${result.command} sent`;
+        notification.style.position = 'fixed';
+        notification.style.bottom = '20px';
+        notification.style.left = '50%';
+        notification.style.transform = 'translateX(-50%)';
+        notification.style.backgroundColor = '#4CAF50';
+        notification.style.color = 'white';
+        notification.style.padding = '10px';
+        notification.style.borderRadius = '5px';
+        notification.style.opacity = '1';
+        notification.style.transition = 'opacity 1s';
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+          notification.style.opacity = '0';
+          setTimeout(() => {
+            document.body.removeChild(notification);
+          }, 1000);
+        }, 2000);
+      } else {
+        alert(`Error: ${result.message}`);
+      }
+    });
+    
+    // Return to search page
+    document.getElementById('return-to-search').addEventListener('click', () => {
+      window.location.href = 'index.html';
+    });
+  </script>
+</body>
+</html>

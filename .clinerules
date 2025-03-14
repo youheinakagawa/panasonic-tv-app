@@ -1,0 +1,26 @@
+# Panasonic TV App Rules
+
+## Project Structure
+- The project is an Electron application for controlling Panasonic TVs.
+- The main process handles UPnP/DLNA communication with TVs.
+- The renderer process handles the user interface.
+
+## Development Rules
+- Use `npm start` to run the application.
+- Windows環境では`&&`を使用せず、コマンドを個別に実行する。
+- 現在のディレクトリがプロジェクトルートになるため、新しいディレクトリを作成する必要はない。
+
+## UPnP/DLNA Rules
+- Use `node-ssdp` for UPnP device discovery.
+- Use `node-upnp` for UPnP device control (although it doesn't provide device discovery functionality).
+- Panasonic TVs can be identified by the `SERVER` header containing `Panasonic`.
+
+## UI Rules
+- The TV list page displays discovered TVs with a "Control" button.
+- The remote control page mimics a physical remote control.
+- Provide visual feedback when commands are sent to TVs.
+
+## Known Patterns
+- Panasonic TVs use a DLNA extension for control, which is not fully implemented yet.
+- The application uses IPC for communication between the main process and renderer process.
+- The application uses events for asynchronous communication.

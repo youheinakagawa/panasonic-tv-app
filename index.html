@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Panasonic TV Remote</title>
+</head>
+<body>
+  <h1>Panasonic TV Remote</h1>
+  <button id="search-tv">Search TV</button>
+  <ul id="tv-list"></ul>
+
+  <script>
+    const { ipcRenderer } = require('electron');
+
+    const searchTvButton = document.getElementById('search-tv');
+    const tvList = document.getElementById('tv-list');
+
+    let searchTimeout;
+
+    searchTvButton.addEventListener('click', () => {
+      tvList.innerHTML = '<li>Searching for TVs...</li>';
+      ipcRenderer.send('search-tv');
+      
+      // Set a timeout to show "No TVs found" if no TVs are found within 5 seconds
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        if (tvList.innerHTML === '<li>Searching for TVs...</li>') {
+          tvList.innerHTML = '<li>No Panasonic TVs found</li>';
+        }
+      }, 5000);
+    });
+
+    ipcRenderer.on('tv-found', (event, devices) => {
+      clearTimeout(searchTimeout);
+      tvList.innerHTML = '';
+      
+      devices.forEach(device => {
+        const li = document.createElement('li');
+        li.textContent = `Panasonic TV found at ${device.ip}:${device.port}`;
+        
+        // Add a button to control the TV
+        const button = document.createElement('button');
+        button.textContent = 'Control';
+        button.onclick = () => {
+          window.location.href = `remote.html?ip=${device.ip}&port=${device.port}`;
+        };
+        
+        li.appendChild(document.createTextNode(' '));
+        li.appendChild(button);
+        tvList.appendChild(li);
+      });
+    });
+  </script>
+</body>
+</html>
