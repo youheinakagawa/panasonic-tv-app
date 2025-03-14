@@ -90,6 +90,41 @@ app.whenReady().then(() => {
               // Log the full XML response for debugging
               console.log('Device description XML:', data);
               
+              // ファイルに保存して詳細分析できるようにする
+              const fs = require('fs');
+              const path = require('path');
+              const logDir = path.join(__dirname, 'logs');
+              
+              // ログディレクトリがなければ作成
+              if (!fs.existsSync(logDir)) {
+                fs.mkdirSync(logDir);
+              }
+              
+              // IPアドレスとタイムスタンプを含むファイル名でXMLを保存
+              const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+              const logFile = path.join(logDir, `tv-${device.ip}-${timestamp}.xml`);
+              fs.writeFileSync(logFile, data);
+              console.log(`XMLデータをファイルに保存しました: ${logFile}`);
+              
+              // お部屋ジャンプリンク関連の情報を探す
+              const roomJumpLinkMatch = data.match(/<roomJumpLink>([^<]+)<\/roomJumpLink>/i) || 
+                                        data.match(/roomJumpLink/i) ||
+                                        data.match(/お部屋ジャンプリンク/i);
+              
+              if (roomJumpLinkMatch) {
+                console.log('お部屋ジャンプリンク情報が見つかりました:', roomJumpLinkMatch[0]);
+                device.roomJumpLink = true;
+              }
+              
+              // アプリ一覧を探す
+              const appListMatch = data.match(/<appList>([^<]+)<\/appList>/i) || 
+                                  data.match(/<app[^>]*>([^<]+)<\/app>/ig);
+              
+              if (appListMatch) {
+                console.log('アプリ一覧情報が見つかりました:', appListMatch);
+                device.appList = appListMatch;
+              }
+              
               // Extract device information from XML
               const friendlyNameMatch = data.match(/<friendlyName>([^<]+)<\/friendlyName>/);
               const manufacturerMatch = data.match(/<manufacturer>([^<]+)<\/manufacturer>/);
@@ -212,6 +247,9 @@ app.whenReady().then(() => {
     // Power
     '⏻': 'NRC_POWER-ONOFF',
     
+    // お部屋ジャンプリンク
+    'お部屋ジャンプリンク': 'NRC_DIGA_CTL-ONOFF', // お部屋ジャンプリンク用のコマンド
+    
     // Navigation
     'Menu': 'NRC_MENU-ONOFF',
     'Home': 'NRC_INTERNET-ONOFF', // VIERA connect
@@ -240,10 +278,14 @@ app.whenReady().then(() => {
     // Input
     'TV': 'NRC_TV-ONOFF',
     'input-tv': 'NRC_TV-ONOFF',
-    'HDMI1': 'NRC_CHG_INPUT-ONOFF', // 入力切替、HDMI1は別途選択が必要かも
-    'input-hdmi1': 'NRC_CHG_INPUT-ONOFF',
-    'HDMI2': 'NRC_CHG_INPUT-ONOFF', // 入力切替、HDMI2は別途選択が必要かも
-    'input-hdmi2': 'NRC_CHG_INPUT-ONOFF',
+    'HDMI1': 'NRC_HDMI1-ONOFF',
+    'input-hdmi1': 'NRC_HDMI1-ONOFF',
+    'HDMI2': 'NRC_HDMI2-ONOFF',
+    'input-hdmi2': 'NRC_HDMI2-ONOFF',
+    'HDMI3': 'NRC_HDMI3-ONOFF',
+    'input-hdmi3': 'NRC_HDMI3-ONOFF',
+    'HDMI4': 'NRC_HDMI4-ONOFF',
+    'input-hdmi4': 'NRC_HDMI4-ONOFF',
     
     // Direction
     'up': 'NRC_UP-ONOFF',
@@ -273,7 +315,25 @@ app.whenReady().then(() => {
     'forward': 'NRC_FF-ONOFF',
     'prev': 'NRC_SKIP_PREV-ONOFF',
     'next': 'NRC_SKIP_NEXT-ONOFF',
-    'record': 'NRC_REC-ONOFF'
+    'record': 'NRC_REC-ONOFF',
+    
+    // Apps
+    'Apps': 'NRC_APP-ONOFF',
+    'VIERA Tools': 'NRC_VTOOLS-ONOFF',
+    'VIERA Connect': 'NRC_INTERNET-ONOFF',
+    'VIERA Link': 'NRC_VIERA_LINK-ONOFF',
+    'VOD': 'NRC_VOD-ONOFF',
+    'Game': 'NRC_GAME-ONOFF',
+    
+    // ブラウザ関連
+    'ブラウザ': 'NRC_BROWSER-ONOFF',
+    
+    // メディア関連
+    'メディアプレーヤー': 'NRC_DATA-ONOFF', // Dボタン
+    
+    // その他のアプリ
+    'テレビメニュー': 'NRC_SUBMENU-ONOFF',
+    'お気に入り': 'NRC_FAVORITE-ONOFF'
   };
 
   // Handle TV remote control commands

@@ -7,6 +7,7 @@
 <body>
   <h1>Panasonic TV Remote</h1>
   <button id="search-tv">Search TV</button>
+  <div id="search-status" style="margin: 10px 0; color: #666;"></div>
   <ul id="tv-list"></ul>
 
   <script>
@@ -17,17 +18,29 @@
 
     let searchTimeout;
 
+    const searchStatus = document.getElementById('search-status');
+
     searchTvButton.addEventListener('click', () => {
-      tvList.innerHTML = '<li>Searching for TVs...</li>';
+      tvList.innerHTML = '';
+      searchStatus.innerHTML = 'Searching for TVs...';
+      searchStatus.style.color = '#666';
       ipcRenderer.send('search-tv');
       
-      // Set a timeout to show "No TVs found" if no TVs are found within 5 seconds
+      // No need for timeout as we'll handle this with the search-status event
       clearTimeout(searchTimeout);
-      searchTimeout = setTimeout(() => {
-        if (tvList.innerHTML === '<li>Searching for TVs...</li>') {
-          tvList.innerHTML = '<li>No Panasonic TVs found</li>';
-        }
-      }, 5000);
+    });
+    
+    // Listen for search status updates
+    ipcRenderer.on('search-status', (event, data) => {
+      searchStatus.innerHTML = data.message;
+      
+      if (data.status === 'no-devices') {
+        searchStatus.style.color = '#e74c3c'; // Red for error
+      } else if (data.status === 'completed') {
+        searchStatus.style.color = '#2ecc71'; // Green for success
+      } else {
+        searchStatus.style.color = '#666'; // Default gray
+      }
     });
 
     ipcRenderer.on('tv-found', (event, devices) => {
@@ -73,12 +86,55 @@
         
         li.appendChild(detailsDiv);
         
+        // デバイス情報を表示
+        if (device.roomJumpLink) {
+          const roomJumpLinkElem = document.createElement('div');
+          roomJumpLinkElem.textContent = 'お部屋ジャンプリンク対応';
+          roomJumpLinkElem.style.color = '#2ecc71';
+          roomJumpLinkElem.style.fontSize = '12px';
+          detailsDiv.appendChild(roomJumpLinkElem);
+        }
+        
+        if (device.appList) {
+          const appListElem = document.createElement('div');
+          appListElem.textContent = 'アプリ一覧あり';
+          appListElem.style.color = '#3498db';
+          appListElem.style.fontSize = '12px';
+          detailsDiv.appendChild(appListElem);
+        }
+        
         // Add a button to control the TV
         const button = document.createElement('button');
         button.textContent = 'Control';
         button.style.marginLeft = '10px';
         button.onclick = () => {
-          window.location.href = `remote.html?ip=${device.ip}&port=${device.port}&name=${encodeURIComponent(device.friendlyName || 'Panasonic TV')}&model=${encodeURIComponent((device.modelName || '') + ' ' + (device.modelNumber || ''))}`;
+          // Log the device information before navigating
+          console.log('Device selected for control:', device);
+          
+          // Always use port 55000 for DLNA control, regardless of the discovery port
+          // This is because Panasonic TVs typically use port 55000 for control
+          const controlPort = '55000';
+          
+          // Pass service URLs to remote control page if available
+          let url = `remote.html?ip=${device.ip}&port=${controlPort}&name=${encodeURIComponent(device.friendlyName || 'Panasonic TV')}&model=${encodeURIComponent((device.modelName || '') + ' ' + (device.modelNumber || ''))}`;
+          
+          if (device.avTransportControlURL) {
+            url += `&avTransportControlURL=${encodeURIComponent(device.avTransportControlURL)}`;
+          }
+          
+          if (device.renderingControlURL) {
+            url += `&renderingControlURL=${encodeURIComponent(device.renderingControlURL)}`;
+          }
+          
+          if (device.roomJumpLink) {
+            url += '&roomJumpLink=true';
+          }
+          
+          if (device.appList) {
+            url += '&hasAppList=true';
+          }
+          
+          window.location.href = url;
         };
         
         li.appendChild(document.createTextNode(' '));
