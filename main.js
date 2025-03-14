@@ -31,8 +31,9 @@ function createWindow() {
   return win;
 }
 
-// Global variable to store discovered devices
+// Global variables to store discovered devices
 let devices = [];
+let uniqueDevices = new Map(); // Map to store unique devices by IP address
 
 app.whenReady().then(() => {
   const win = createWindow();
@@ -40,6 +41,7 @@ app.whenReady().then(() => {
   ipcMain.on('search-tv', () => {
     const client = new Client();
     devices = []; // Reset devices list
+    uniqueDevices.clear(); // Clear unique devices map
 
     client.on('response', (headers, statusCode, rinfo) => {
       console.log('Got a response to an m-search:', headers);
@@ -65,89 +67,97 @@ app.whenReady().then(() => {
           port: rinfo.port
         };
         
-        // Check if device is already in the list
-        // Use IP address to check for duplicates, as the same TV might be detected on different ports
-        const exists = devices.some(d => d.ip === device.ip);
-        if (!exists) {
-          // Get device details
-          http.get(headers.LOCATION, (res) => {
-            let data = '';
-            res.on('data', (chunk) => {
-              data += chunk;
-            });
-            res.on('end', () => {
-              try {
-                // Log the full XML response for debugging
-                console.log('Device description XML:', data);
-                
-                // Extract device information from XML
-                const friendlyNameMatch = data.match(/<friendlyName>([^<]+)<\/friendlyName>/);
-                const manufacturerMatch = data.match(/<manufacturer>([^<]+)<\/manufacturer>/);
-                const modelNameMatch = data.match(/<modelName>([^<]+)<\/modelName>/);
-                const modelNumberMatch = data.match(/<modelNumber>([^<]+)<\/modelNumber>/);
-                const deviceTypeMatch = data.match(/<deviceType>([^<]+)<\/deviceType>/);
-                
-                // Extract service information
-                const serviceTypeMatch = data.match(/<serviceType>([^<]+)<\/serviceType>/g);
-                const serviceIdMatch = data.match(/<serviceId>([^<]+)<\/serviceId>/g);
-                const controlURLMatch = data.match(/<controlURL>([^<]+)<\/controlURL>/g);
-                
-                if (serviceTypeMatch) {
-                  console.log('Service Types:', serviceTypeMatch);
-                }
-                if (serviceIdMatch) {
-                  console.log('Service IDs:', serviceIdMatch);
-                }
-                if (controlURLMatch) {
-                  console.log('Control URLs:', controlURLMatch);
-                }
-                
-                // Extract service URLs from control URLs
-                const avTransportControlURL = extractServiceURL(data, 'AVTransport');
-                const renderingControlURL = extractServiceURL(data, 'RenderingControl');
-                
-                if (avTransportControlURL) {
-                  console.log('AVTransport Control URL:', avTransportControlURL);
-                  device.avTransportControlURL = avTransportControlURL;
-                }
-                if (renderingControlURL) {
-                  console.log('RenderingControl URL:', renderingControlURL);
-                  device.renderingControlURL = renderingControlURL;
-                }
-                
-                if (friendlyNameMatch) {
-                  device.friendlyName = friendlyNameMatch[1];
-                }
-                if (manufacturerMatch) {
-                  device.manufacturer = manufacturerMatch[1];
-                }
-                if (modelNameMatch) {
-                  device.modelName = modelNameMatch[1];
-                }
-                if (modelNumberMatch) {
-                  device.modelNumber = modelNumberMatch[1];
-                }
-                if (deviceTypeMatch) {
-                  device.deviceType = deviceTypeMatch[1];
-                }
-                
-                devices.push(device);
-                // Send the updated devices list to the renderer process
-                win.webContents.send('tv-found', devices);
-              } catch (error) {
-                console.error('Error parsing device details:', error);
-                devices.push(device);
-                // Send the updated devices list to the renderer process
-                win.webContents.send('tv-found', devices);
-              }
-            });
-          }).on('error', (error) => {
-            console.error('Error getting device details:', error);
-            devices.push(device);
-            // Send the updated devices list to the renderer process
-            win.webContents.send('tv-found', devices);
-          });
+        // Skip processing if we already have a device with this IP that has a Panasonic-specific service
+        // and this device doesn't have a Panasonic-specific service
+        const existingDevice = uniqueDevices.get(device.ip);
+        const hasPanasonicService = headers.USN && headers.USN.includes('panasonic-com');
+        
+        if (existingDevice && existingDevice.hasPanasonicService && !hasPanasonicService) {
+          return;
         }
+        
+        // Store this device's Panasonic service status
+        device.hasPanasonicService = hasPanasonicService;
+        
+        // Get device details
+        http.get(headers.LOCATION, (res) => {
+          let data = '';
+          res.on('data', (chunk) => {
+            data += chunk;
+          });
+          res.on('end', () => {
+            try {
+              // Log the full XML response for debugging
+              console.log('Device description XML:', data);
+              
+              // Extract device information from XML
+              const friendlyNameMatch = data.match(/<friendlyName>([^<]+)<\/friendlyName>/);
+              const manufacturerMatch = data.match(/<manufacturer>([^<]+)<\/manufacturer>/);
+              const modelNameMatch = data.match(/<modelName>([^<]+)<\/modelName>/);
+              const modelNumberMatch = data.match(/<modelNumber>([^<]+)<\/modelNumber>/);
+              const deviceTypeMatch = data.match(/<deviceType>([^<]+)<\/deviceType>/);
+              
+              // Extract service information
+              const serviceTypeMatch = data.match(/<serviceType>([^<]+)<\/serviceType>/g);
+              const serviceIdMatch = data.match(/<serviceId>([^<]+)<\/serviceId>/g);
+              const controlURLMatch = data.match(/<controlURL>([^<]+)<\/controlURL>/g);
+              
+              if (serviceTypeMatch) {
+                console.log('Service Types:', serviceTypeMatch);
+              }
+              if (serviceIdMatch) {
+                console.log('Service IDs:', serviceIdMatch);
+              }
+              if (controlURLMatch) {
+                console.log('Control URLs:', controlURLMatch);
+              }
+              
+              // Extract service URLs from control URLs
+              const avTransportControlURL = extractServiceURL(data, 'AVTransport');
+              const renderingControlURL = extractServiceURL(data, 'RenderingControl');
+              
+              if (avTransportControlURL) {
+                console.log('AVTransport Control URL:', avTransportControlURL);
+                device.avTransportControlURL = avTransportControlURL;
+              }
+              if (renderingControlURL) {
+                console.log('RenderingControl URL:', renderingControlURL);
+                device.renderingControlURL = renderingControlURL;
+              }
+              
+              if (friendlyNameMatch) {
+                device.friendlyName = friendlyNameMatch[1];
+              }
+              if (manufacturerMatch) {
+                device.manufacturer = manufacturerMatch[1];
+              }
+              if (modelNameMatch) {
+                device.modelName = modelNameMatch[1];
+              }
+              if (modelNumberMatch) {
+                device.modelNumber = modelNumberMatch[1];
+              }
+              if (deviceTypeMatch) {
+                device.deviceType = deviceTypeMatch[1];
+              }
+              
+              // Store in our unique devices map, prioritizing devices with Panasonic-specific services
+              uniqueDevices.set(device.ip, device);
+              
+              // Don't send updates yet, we'll send the final list after search completes
+            } catch (error) {
+              console.error('Error parsing device details:', error);
+              // Store in our unique devices map
+              uniqueDevices.set(device.ip, device);
+              // Don't send updates yet
+            }
+          });
+        }).on('error', (error) => {
+          console.error('Error getting device details:', error);
+          // Store in our unique devices map
+          uniqueDevices.set(device.ip, device);
+          // Don't send updates yet
+        });
       }
     });
 
@@ -166,8 +176,21 @@ app.whenReady().then(() => {
       client.stop();
       console.log('UPnP device search completed');
       
+      // Convert our map of unique devices to an array
+      devices = Array.from(uniqueDevices.values());
+      
+      // Filter devices to prioritize those with p00RemoteController deviceType
+      // or MediaRenderer deviceType for control
+      const controlDevices = devices.filter(device => 
+        device.deviceType === 'urn:panasonic-com:device:p00RemoteController:1' || 
+        device.deviceType === 'urn:schemas-upnp-org:device:MediaRenderer:1'
+      );
+      
+      // If we have control devices, only show those
+      const devicesToShow = controlDevices.length > 0 ? controlDevices : devices;
+      
       // If no devices were found, send a message
-      if (devices.length === 0) {
+      if (devicesToShow.length === 0) {
         win.webContents.send('search-status', { 
           status: 'no-devices', 
           message: 'No Panasonic TVs found. Please ensure your TV is powered on and connected to the same network.' 
@@ -175,8 +198,11 @@ app.whenReady().then(() => {
       } else {
         win.webContents.send('search-status', { 
           status: 'completed', 
-          message: `Found ${devices.length} Panasonic TV(s)` 
+          message: `Found ${devicesToShow.length} Panasonic TV(s)` 
         });
+        
+        // Send the filtered devices list to the renderer process
+        win.webContents.send('tv-found', devicesToShow);
       }
     }, 10000);
   });
