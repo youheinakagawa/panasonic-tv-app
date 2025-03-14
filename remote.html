@@ -3,26 +3,46 @@
 <head>
   <meta charset="UTF-8">
   <title>Panasonic TV Remote</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 20px;
-      background-color: #f0f0f0;
-    }
-    
-    h1 {
-      color: #333;
-    }
-    
-    .remote {
-      background-color: #333;
-      border-radius: 10px;
-      padding: 20px;
-      width: 300px;
-      margin: 20px auto;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f0f0f0;
+      }
+      
+      h1 {
+        color: #333;
+      }
+      
+      .remote {
+        background-color: #333;
+        border-radius: 10px;
+        padding: 20px;
+        width: 90%;
+        max-width: 400px;
+        margin: 20px auto;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      /* レスポンシブデザイン用のメディアクエリ */
+      @media (max-width: 480px) {
+        .remote {
+          width: 95%;
+          padding: 15px;
+        }
+        .remote-button {
+          padding: 8px 12px;
+          font-size: 14px;
+          min-width: 40px;
+        }
+      }
+      
+      @media (min-width: 768px) {
+        .remote {
+          max-width: 500px;
+        }
+      }
     
     .remote-header {
       display: flex;
@@ -202,12 +222,49 @@
       </div>
     </div>
     
+    <!-- アプリ -->
+    <div style="margin-top: 15px;">
+      <div style="color: white; margin-bottom: 10px;">アプリ</div>
+      <div class="button-row">
+        <button class="remote-button" id="apps">Apps</button>
+      </div>
+      <div class="button-row" style="margin-top: 5px;">
+        <button class="remote-button" id="viera-tools">VIERA Tools</button>
+        <button class="remote-button" id="viera-connect">VIERA Connect</button>
+      </div>
+      <div class="button-row" style="margin-top: 5px;">
+        <button class="remote-button" id="viera-link">VIERA Link</button>
+        <button class="remote-button" id="vod">VOD</button>
+        <button class="remote-button" id="game">Game</button>
+      </div>
+      <div id="room-jump-link-container" style="display: none; margin-top: 5px;">
+        <button class="remote-button" id="room-jump-link" style="width: 100%; background-color: #27ae60;">お部屋ジャンプリンク</button>
+      </div>
+      
+      <!-- 追加アプリ -->
+      <div style="margin-top: 15px;">
+        <div style="color: white; margin-bottom: 10px;">追加アプリ</div>
+        <div class="button-row">
+          <button class="remote-button" id="browser" style="background-color: #3498db;">ブラウザ</button>
+          <button class="remote-button" id="media-player" style="background-color: #9b59b6;">メディアプレーヤー</button>
+        </div>
+        <div class="button-row" style="margin-top: 5px;">
+          <button class="remote-button" id="tv-menu" style="background-color: #f39c12;">テレビメニュー</button>
+          <button class="remote-button" id="favorite" style="background-color: #e74c3c;">お気に入り</button>
+        </div>
+      </div>
+    </div>
+    
     <div class="input-section" style="margin-top: 15px;">
       <div class="input-label" style="color: white; margin-bottom: 10px;">入力切替</div>
       <div class="button-row">
         <button class="remote-button input-button" id="input-tv">TV</button>
         <button class="remote-button input-button" id="input-hdmi1">HDMI1</button>
         <button class="remote-button input-button" id="input-hdmi2">HDMI2</button>
+      </div>
+      <div class="button-row" style="margin-top: 5px;">
+        <button class="remote-button input-button" id="input-hdmi3">HDMI3</button>
+        <button class="remote-button input-button" id="input-hdmi4">HDMI4</button>
       </div>
     </div>
     
@@ -225,9 +282,17 @@
     const tvModel = urlParams.get('model') || '';
     const avTransportControlURL = urlParams.get('avTransportControlURL');
     const renderingControlURL = urlParams.get('renderingControlURL');
+    const hasRoomJumpLink = urlParams.get('roomJumpLink') === 'true';
+    const hasAppList = urlParams.get('hasAppList') === 'true';
     
     console.log(`TV Info - IP: ${tvIp}, Port: ${tvPort}, Name: ${tvName}, Model: ${tvModel}`);
     console.log(`Service URLs - AVTransport: ${avTransportControlURL}, RenderingControl: ${renderingControlURL}`);
+    console.log(`Features - Room Jump Link: ${hasRoomJumpLink}, App List: ${hasAppList}`);
+    
+    // お部屋ジャンプリンク機能が利用可能な場合、ボタンを表示
+    if (hasRoomJumpLink) {
+      document.getElementById('room-jump-link-container').style.display = 'block';
+    }
     
     document.getElementById('tv-ip').textContent = tvName;
     
@@ -323,11 +388,29 @@
     
     // Add keyboard event listener
     document.addEventListener('keydown', (event) => {
-      console.log(`Key pressed: ${event.key}`);
+      console.log(`Key pressed: ${event.key}, Shift: ${event.shiftKey}, Ctrl: ${event.ctrlKey}`);
       let command = null;
       
       // Map keys to commands
       switch (event.key) {
+        // アプリ関連のショートカット
+        case 'f1':
+          command = 'ブラウザ';
+          break;
+        case 'f2':
+          command = 'メディアプレーヤー';
+          break;
+        case 'f3':
+          command = 'テレビメニュー';
+          break;
+        case 'f4':
+          command = 'お気に入り';
+          break;
+        case 'f5':
+          if (hasRoomJumpLink) {
+            command = 'お部屋ジャンプリンク';
+          }
+          break;
         // Numbers
         case '0':
         case '1':
@@ -351,16 +434,29 @@
           command = '-';
           break;
         
-        // Channel
+        // Direction/Channel/Volume with modifiers
         case 'ArrowUp':
-          command = 'channel-up';
+          if (event.shiftKey) {
+            command = 'channel-up';
+          } else if (event.ctrlKey) {
+            command = '+'; // Volume up
+          } else {
+            command = 'up'; // Direction up
+          }
           break;
         case 'ArrowDown':
-          command = 'channel-down';
+          if (event.shiftKey) {
+            command = 'channel-down';
+          } else if (event.ctrlKey) {
+            command = '-'; // Volume down
+          } else {
+            command = 'down'; // Direction down
+          }
           break;
         
         // Navigation
         case 'Escape':
+        case 'Backspace':
           command = 'Back';
           break;
         case 'Home':
@@ -382,6 +478,12 @@
           break;
         case 'j':
           command = 'input-hdmi2';
+          break;
+        case 'k':
+          command = 'input-hdmi3';
+          break;
+        case 'l':
+          command = 'input-hdmi4';
           break;
           
         // Direction
