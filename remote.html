@@ -125,7 +125,7 @@
       <div class="tv-info">
         <div id="tv-ip"></div>
       </div>
-      <button class="power-button" id="power">⏻</button>
+      <button class="power-button" id="power">電源</button>
     </div>
     
     <div class="button-row">
@@ -207,6 +207,15 @@
       </div>
     </div>
     
+    <!-- その他のボタン -->
+    <div style="margin-top: 15px;">
+      <div style="color: white; margin-bottom: 10px;">その他</div>
+      <div class="button-row">
+        <button class="remote-button" id="subtitles">字幕</button>
+        <button class="remote-button" id="split">画面分割</button>
+      </div>
+    </div>
+    
     <!-- メディア制御 -->
     <div style="margin-top: 15px;">
       <div style="color: white; margin-bottom: 10px;">メディア制御</div>
@@ -255,16 +264,11 @@
       </div>
     </div>
     
-    <div class="input-section" style="margin-top: 15px;">
+      <div class="input-section" style="margin-top: 15px;">
       <div class="input-label" style="color: white; margin-bottom: 10px;">入力切替</div>
       <div class="button-row">
-        <button class="remote-button input-button" id="input-tv">TV</button>
-        <button class="remote-button input-button" id="input-hdmi1">HDMI1</button>
-        <button class="remote-button input-button" id="input-hdmi2">HDMI2</button>
-      </div>
-      <div class="button-row" style="margin-top: 5px;">
-        <button class="remote-button input-button" id="input-hdmi3">HDMI3</button>
-        <button class="remote-button input-button" id="input-hdmi4">HDMI4</button>
+        <button class="remote-button input-button" id="tv-change" style="background-color: #2980b9;">テレビ切替</button>
+        <button class="remote-button input-button" id="input-change" style="background-color: #e67e22;">入力切替</button>
       </div>
     </div>
     
@@ -466,24 +470,23 @@
           command = 'Menu';
           break;
         case 'p':
-          command = '⏻'; // Power
+          command = '電源'; // Power
           break;
         
         // Input switching
         case 't':
-          command = 'input-tv';
+          command = 'テレビ切替';
           break;
         case 'h':
-          command = 'input-hdmi1';
-          break;
         case 'j':
-          command = 'input-hdmi2';
-          break;
         case 'k':
-          command = 'input-hdmi3';
-          break;
         case 'l':
-          command = 'input-hdmi4';
+        case 'i':
+          if (event.key === 'i' && !event.ctrlKey) {
+            command = 'info';
+            break;
+          }
+          command = '入力切替';
           break;
           
         // Direction
@@ -512,9 +515,6 @@
           break;
           
         // Other
-        case 'i':
-          command = 'info';
-          break;
         case 'u':
           command = 'guide'; // EPG
           break;
@@ -550,6 +550,12 @@
         case 'w':
           command = 'record';
           break;
+        case 's':
+          command = '字幕';
+          break;
+        case 'v':
+          command = '画面分割';
+          break;
       }
       
       // If a command was mapped, send it
@@ -570,3 +576,5 @@
       }
     });
   </script>
+</body>
+</html>

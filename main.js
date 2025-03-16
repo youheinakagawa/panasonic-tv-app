@@ -245,7 +245,7 @@ app.whenReady().then(() => {
   // Panasonic TV key event mapping
   const keyEventMap = {
     // Power
-    '⏻': 'NRC_POWER-ONOFF',
+    '電源': 'NRC_POWER-ONOFF',
     
     // お部屋ジャンプリンク
     'お部屋ジャンプリンク': 'NRC_DIGA_CTL-ONOFF', // お部屋ジャンプリンク用のコマンド
@@ -276,16 +276,17 @@ app.whenReady().then(() => {
     '9': 'NRC_D9-ONOFF',
     
     // Input
-    'TV': 'NRC_TV-ONOFF',
-    'input-tv': 'NRC_TV-ONOFF',
-    'HDMI1': 'NRC_HDMI1-ONOFF',
-    'input-hdmi1': 'NRC_HDMI1-ONOFF',
-    'HDMI2': 'NRC_HDMI2-ONOFF',
-    'input-hdmi2': 'NRC_HDMI2-ONOFF',
-    'HDMI3': 'NRC_HDMI3-ONOFF',
-    'input-hdmi3': 'NRC_HDMI3-ONOFF',
-    'HDMI4': 'NRC_HDMI4-ONOFF',
-    'input-hdmi4': 'NRC_HDMI4-ONOFF',
+    'TV': 'NRC_DTV-ONOFF',
+    'テレビ切替': 'NRC_DTV-ONOFF',
+    'HDMI1': 'NRC_CHG_INPUT-ONOFF',
+    'input-hdmi1': 'NRC_CHG_INPUT-ONOFF',
+    'HDMI2': 'NRC_CHG_INPUT-ONOFF',
+    'input-hdmi2': 'NRC_CHG_INPUT-ONOFF',
+    'HDMI3': 'NRC_CHG_INPUT-ONOFF',
+    'input-hdmi3': 'NRC_CHG_INPUT-ONOFF',
+    'HDMI4': 'NRC_CHG_INPUT-ONOFF',
+    'input-hdmi4': 'NRC_CHG_INPUT-ONOFF',
+    '入力切替': 'NRC_CHG_INPUT-ONOFF',
     
     // Direction
     'up': 'NRC_UP-ONOFF',
@@ -318,7 +319,7 @@ app.whenReady().then(() => {
     'record': 'NRC_REC-ONOFF',
     
     // Apps
-    'Apps': 'NRC_APP-ONOFF',
+    'Apps': 'NRC_APPS-ONOFF',
     'VIERA Tools': 'NRC_VTOOLS-ONOFF',
     'VIERA Connect': 'NRC_INTERNET-ONOFF',
     'VIERA Link': 'NRC_VIERA_LINK-ONOFF',
@@ -333,7 +334,13 @@ app.whenReady().then(() => {
     
     // その他のアプリ
     'テレビメニュー': 'NRC_SUBMENU-ONOFF',
-    'お気に入り': 'NRC_FAVORITE-ONOFF'
+    'お気に入り': 'NRC_FAVORITE-ONOFF',
+    
+    // 字幕
+    '字幕': 'NRC_TEXT-ONOFF',
+    
+    // 画面分割
+    '画面分割': 'NRC_SPLIT-ONOFF'
   };
 
   // Handle TV remote control commands
